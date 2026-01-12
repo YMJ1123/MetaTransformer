@@ -9,6 +9,7 @@ Metagenomic classification using Transformer
 3. [Model training](#3-model-training)
 4. [Configuration file](#4-configuration-file)
 5. [Testing the model](#5-testing-the-model)
+   - [5.1 Batch Processing Script](#51-batch-processing-script)
 6. [Training and testing data preparation](#6-training-and-testing-data-preparation)
 7. [Additional data](#7-additional-data)
 
@@ -17,7 +18,8 @@ The project is structured into the following folders:
 - **bin**: Contains third party scripts that are used by other scripts in the projects
 - **scripts**: Contains scripts for training data generation and plotting of results graphics
 - **src**: Contains the actual code for model definition, training and testing
-- **sequence_metadata**: Contains genus and species mapping as well as taxonomy information and weightings for the model (see configuration file) 
+- **sequence_metadata**: Contains genus and species mapping as well as taxonomy information and weightings for the model (see configuration file)
+- **myScript**: Contains custom helper scripts for batch processing and output concatenation 
 
 ## 2. Setup
 To use the code you need to have Python3 and CUDA 11.1 installed. Preferably, use a virtual environment to install the dependencies. To install the dependencies invoke 
@@ -115,6 +117,57 @@ python src/script/subset_fasta.py \
   --n-reads <number of reads to split the file into> \
   --out-folder <path to out-folder> 
 ```
+
+### 5.1 Batch Processing Script
+
+For batch processing multiple samples, use the parameterized script `myScript/all_file_command_args.sh`:
+
+```bash
+bash myScript/all_file_command_args.sh [OPTIONS]
+```
+
+**Available Options:**
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `-b, --base-dir` | MetaTransformer base directory | `/home/$USER/MetaTransformer` |
+| `-i, --input-dir` | Input test data directory name | `test_data_summer` |
+| `-o, --output-dir` | Output directory name | `test_Output_model_summer` |
+| `-c, --concat-dir` | Concatenated output directory name | `test_Output_Concatenated` |
+| `-m, --model-dir` | Model directory name | `pretrained_Model` |
+| `-f, --config-file` | Config file name | `config_species.yaml` |
+| `-w, --model-weights` | Model weights file name | `classification_species_transformer_ckpt_bt_500000.pt` |
+| `-s, --species-mapping` | Species mapping file path | `sequence_metadata/species_mapping.tab` |
+| `-v, --vocab-file` | Vocab file path | `vocab_file/vocab_13mer.txt` |
+| `-l, --log-file` | Log file name | `train_species.log` |
+| `-n, --n-reads` | Number of reads per split | `65000` |
+| `-t, --threads` | Number of threads per batch | `32` |
+| `-h, --help` | Show help message | - |
+
+**Examples:**
+
+```bash
+# Use default settings
+bash myScript/all_file_command_args.sh
+
+# Custom input/output directories
+bash myScript/all_file_command_args.sh -i my_test_data -o my_output
+
+# Full customization
+bash myScript/all_file_command_args.sh \
+    -b /path/to/MetaTransformer \
+    -i custom_input \
+    -o custom_output \
+    -n 100000 \
+    -t 16
+```
+
+The script will:
+1. Process all sample folders in the input directory
+2. Split large FASTA files into smaller chunks
+3. Organize files into batches for parallel processing
+4. Run MetaTransformer inference on each batch
+5. Concatenate results into a single abundance CSV per sample
 
 ## 6. Training and testing data preparation
 ### 6.1 Training data
