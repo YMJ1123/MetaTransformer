@@ -5,8 +5,10 @@ import os
 def write_fasta(reads, counter, rootname, out):
 
         if (counter < 10):
-            pre = "00"
+            pre = "000"
         elif (counter < 100):
+            pre = "00"
+        elif (counter < 1000):
             pre = "0"
         else:
             pre = ""

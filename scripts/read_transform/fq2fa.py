@@ -8,12 +8,23 @@ from multiprocessing import Process, Value, Lock
 
 def convert_worker(file_paths, shared_progress, lock, num_files):
     for file_path in file_paths:
-        with open(file_path, 'r') as src_file_handle:
-            src_seqs = SeqIO.parse(src_file_handle, "fastq")
-            dest_file_path = file_path.replace(".fq", ".fa")
-            with open(dest_file_path, "w") as dest_file_handle:
-                SeqIO.write(src_seqs, dest_file_handle, "fasta")
-        os.remove(file_path)
+        try:
+            with open(file_path, 'r') as src_file_handle:
+                src_seqs = SeqIO.parse(src_file_handle, "fastq")
+                dest_file_path = file_path.replace(".fq", ".fa")
+                with open(dest_file_path, "w") as dest_file_handle:
+                    SeqIO.write(src_seqs, dest_file_handle, "fasta")
+            os.remove(file_path)
+        except Exception as e:
+            print(f"\nError processing {file_path}: {e}")
+            print(f"Skipping file {file_path}")
+            # Try to remove the problematic file
+            try:
+                os.remove(file_path)
+            except:
+                pass
+            continue
+        
         lock.acquire()
         try:
             shared_progress.value += 1

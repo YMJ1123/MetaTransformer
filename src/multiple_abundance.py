@@ -11,16 +11,16 @@ from __future__ import absolute_import, division, print_function
 
 
 
-
+import folium
 import copy
-import torch
-from tqdm import tqdm
 import os
 import glob
 import numpy as np
 import pandas as pd
 from omegaconf import OmegaConf
 from torch.utils.data import DataLoader
+import torch
+from tqdm import tqdm
 
 from dataset.MetagenomicReadDataset import ProcessingMetagenomicReadDataset, ProcessingMetagenomicSingleReadDataset
 from models.model_utils import get_label_transforms, instantiate_model_by_str_name, read_transforms_for_input_layer
@@ -43,8 +43,12 @@ def test(net, test_loader, device, index, single = True):
     out_labels = []
     if single: file_ids = []
 
+    step = 0
     with torch.no_grad():
         for data in tqdm(test_loader):
+            step += 1
+            if step % 100 == 0:
+                print(f"Step: {step}")
             if single:
                 reads, labels, file_id = data
             else:
@@ -221,6 +225,11 @@ def main():
     net = instantiate_model_by_str_name(hydra_conf.model.name, hydra_conf, vocab_size)
 
     state = torch.load(cmd_args.model_state_path, map_location="cpu")
+    print("Model state_dict keys:")
+    print(net.state_dict().keys())
+
+    print("Checkpoint state_dict keys:")
+    print(state["model_state_dict"].keys())
     net.load_state_dict(state["model_state_dict"], strict=False)
     net.eval()
     net.to(device)
@@ -275,8 +284,10 @@ def main():
         del dataloader
         if single: del file_ids
 
-    else:    
+    else:
+      print(f"reads path: {cmd_args.reads_path}")
       all_files = glob.glob(os.path.join(cmd_args.reads_path, "*.fa"))
+      print(all_files)
       file_map = dict()
       file_map_rev = dict()
       
@@ -292,6 +303,7 @@ def main():
       if single:
           dataset = ProcessingMetagenomicSingleReadDataset(cmd_args.reads_path, read_transforms, file_map, label_transforms=label_transform, consistent_read_len=False)
           dataloader = DataLoader(dataset, batch_size=cmd_args.batch_size, shuffle=False, num_workers=cmd_args.n_worker, collate_fn=train_collate_single_fn_padded, drop_last=True)
+         #print(f"Len of dataloader: {len(dataloader)}")
       else:
           dataset = ProcessingMetagenomicReadDataset(cmd_args.reads_path, read_transforms, label_transforms=label_transform, consistent_read_len=False)
           dataloader = DataLoader(dataset, batch_size=cmd_args.batch_size, shuffle=False, num_workers= cmd_args.n_worker, collate_fn=train_collate_fn_padded, drop_last=True)
@@ -302,6 +314,8 @@ def main():
      
       if single:
          predictions, labels , file_ids = test(net, dataloader, device, cmd_args.level_index, single)
+         print(f"Shape[0]:{file_ids.shape[0]}")
+         print(f"file_ids[0]: {file_ids[0]}")
          file_ids = file_ids[torch.arange(0, file_ids.shape[0], avg_n)]
       else:
           predictions, labels = test(net, dataloader, device, cmd_args.level_index, single)

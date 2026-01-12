@@ -1,0 +1,53 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Build directories
+build/
+dist/
+*.egg-info/
+
+# Cython generated files
+*.c
+!src/cython/cython_transforms.c
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Model outputs and test data
+test_Output_*/
+test_data_*/
+pretrained_Model/
+
+# Large vocabulary files
+vocab_file/
+
+# Logs
+*.log
+logs/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+
+

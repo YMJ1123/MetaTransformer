@@ -45,7 +45,8 @@ For model training invoke the `train.py` script in the following way
 python3 train.py experiment_name=<name-of-training> \
                  experiment_base_dir=<path-where-to-save-training-data> \
                  cfg_path=<path-to-config-yaml-file> \
-                 data_path_root=<path-prefix-to-training-data> 
+                 data_path_root=<path-prefix-to-training-data> \
+                 resume_dir=<path-to-training-data-folder>  # Leave empty for new training
 ``` 
 The last parameter `data_path_root` acts as a path-prefix to enable training on multiple machines where the training data is located at another path (i.e. training on a local machine and a cluster).
 

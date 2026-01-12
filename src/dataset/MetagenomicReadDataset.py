@@ -110,6 +110,8 @@ class ProcessingMetagenomicReadDataset(IterableDataset):
         self.file_path = file_path
         if directory_mode:
             self.all_files = glob.glob(os.path.join(self.file_path, "*.fa"))
+            print("All files: ")
+            print(self.all_files)
         else:
             self.all_files = [file_path]
         self.worker_files = None

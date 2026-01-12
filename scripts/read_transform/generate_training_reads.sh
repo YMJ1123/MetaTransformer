@@ -80,9 +80,14 @@ tmp_path=${fasta_out_path}/tmp
 
 # Two-stranded reads from generator. Merge them first. Then split them into multiple files for python multiprocessing
 echo "Merging files."
-cat ${tmp_path}/reads*.fq > ${tmp_path}/merged_reads.fq
-echo "Deleting original chunks."
-rm ${tmp_path}/reads*.fq
+if ls ${tmp_path}/reads*.fq 1> /dev/null 2>&1; then
+  cat ${tmp_path}/reads*.fq > ${tmp_path}/merged_reads.fq
+  echo "Deleting original chunks."
+  rm ${tmp_path}/reads*.fq
+else
+  echo "No per-genome read chunks to merge (already merged during generation)."
+fi
+
 echo "Splitting data into ${num_file_split} chunks."
 split_data_to_chunks ${tmp_path} merged_reads.fq ${num_file_split} read_chunk_ .fq
 echo "Converting FASTQ to FASTA format."

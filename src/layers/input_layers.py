@@ -4,7 +4,8 @@ from math import sqrt
 from typing import List
 import torch
 from torch import nn
-from torch.tensor import Tensor
+# from torch import Tensor
+from torch import Tensor
 from torch.utils.data import DataLoader
 import random
 

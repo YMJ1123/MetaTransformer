@@ -19,7 +19,7 @@ from utils.utils import SPECIAL_TOKENS, SPECIAL_TOKENS_2_INDEX
 translation_dict = {"A": "T", "T": "A", "C": "G", "G": "C", "N": "N",
                     "K": "N", "M": "N", "R": "N", "Y": "N", "S": "N",
                     "W": "N", "B": "N", "V": "N", "H": "N", "D": "N",
-                    "X": "N"}
+                    "X": "N", "x": "N"}
 
 one_hot_encoding = {"<pad>": 0, "<unk>": 1, "<cls>": 2, "<sep>": 3, "A": 4, "C": 5, "G": 6, "T": 7}
 one_hot_encoding_len = len(one_hot_encoding)

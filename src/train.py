@@ -40,8 +40,11 @@ def main(cmd_line_args, cfg):
     
     logger.debug("Loading model, embedding and transformations.")
     read_transforms = read_transforms_for_input_layer(cfg.mdl_common.input_module, cfg, vocab)
+    logger.debug("Loading label transformations.")
     label_transform = get_label_transforms(cfg.mdl_common.class_indices)
+    logger.debug("Instantiating model.")
     net = instantiate_model_by_str_name(cfg.model.name, cfg, vocab_size)
+    logger.debug("Model instantiated.")
 
     # only log model summary if model training is started for the first time and not from pretrained model
     if not cfg.common.resume_model:
@@ -81,7 +84,15 @@ def main(cmd_line_args, cfg):
     
     metric_fns = None
     if not cfg.multi_level_cls.use:
-        metric_fns = [precision, recall]
+        # Ensure single-level metrics honor the configured classification_threshold
+        thresh = cfg.mdl_common.classification_threshold if hasattr(cfg.mdl_common, 'classification_threshold') else 0.5
+        def precision_with_thresh(preds, labels, t=thresh):
+            return precision(preds, labels, threshold=t)
+        precision_with_thresh.__name__ = 'precision'
+        def recall_with_thresh(preds, labels, t=thresh):
+            return recall(preds, labels, threshold=t)
+        recall_with_thresh.__name__ = 'recall'
+        metric_fns = [precision_with_thresh, recall_with_thresh]
     else:
         thresh = cfg.mdl_common.classification_threshold
         metric_fns = []

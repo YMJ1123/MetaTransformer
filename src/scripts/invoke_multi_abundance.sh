@@ -40,6 +40,7 @@ echo "Subsetting input data"
 cd $input
 array=($(ls *.fa))
 size=${#array[@]}
+echo "Size is $size"
 working=true
 i=0
 
@@ -52,7 +53,11 @@ do
   if [ $i_new -ge $size ]
     then 
       mv ${array[@]:$i:(($num_processes*2+$size-$i_new))} tmp$i
+      input="${input}/tmp${i}"
+      echo $input
+      echo "inew ge size"
       working=false
+      echo "$PWD"
   else
       mv ${array[@]:$i:$num_processes} tmp$i
       ((i+=$num_processes))	
@@ -65,7 +70,7 @@ echo "Calculate abundance"
 cd $workdir
 START=$(date +%s.%N)
 
-python3 multiple_abundance.py \
+python3 /home/ymj1123ntu/MetaTransformer/src/multiple_abundance.py \
 	--reads-path ${input} \
 	--output-path ${out_dir} \
 	--class-mapping-path ${mapping} \
